@@ -1,0 +1,7 @@
+- [ ] Handle through websockets
+- [ ] Handle Users leaving and finding and choosing host
+- [ ] Handle inviting players
+- [ ] Implement search ui
+- [ ] maybe create a little web dashboard?
+- [ ] Test in sandbox
+- [ ] Implement finding users by similar skill level
