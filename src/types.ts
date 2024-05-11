@@ -1,10 +1,10 @@
 export interface IUser {
    displayName: string;
-   steamId: number;
+   steamId: string;
 }
 
 export interface BaseLobby {
-   ownerId: number;
+   ownerId: string;
    lobbyName: string;
    maxPlayers: number;
 }

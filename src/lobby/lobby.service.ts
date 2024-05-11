@@ -11,7 +11,7 @@ export async function find(id: number): Promise<Lobby | null> {
    return lobby;
 }
 
-export async function findByUser(id: number): Promise<Lobby | null> {
+export async function findByUser(id: string): Promise<Lobby | null> {
    const lobby = Lobby.findOne({ where: { ownerId: id } });
    return lobby;
 }

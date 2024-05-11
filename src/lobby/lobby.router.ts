@@ -32,7 +32,7 @@ lobbyRouter.get("/:id", async (req: Request, res: Response) => {
 });
 
 lobbyRouter.get("/owner/:id", async (req: Request, res: Response) => {
-   const id: number = parseInt(req.params.id, 10);
+   const id = req.params.id;
    console.log(`searching for specific by user!: ${id}`);
 
    try {
