@@ -1,14 +1,13 @@
-import * as dotenv from "dotenv";
 import clc from "cli-color";
 import express from "express";
 import { userRouter } from "./user/user.router";
 import { lobbyRouter } from "./lobby/lobby.router";
 import * as db from "./database";
+import config from "./config";
 
-dotenv.config();
 db.init();
 
-const port = parseInt(process.env.PORT as string) || 3000;
+const port = config.port;
 const app = express();
 
 app.use(express.json());

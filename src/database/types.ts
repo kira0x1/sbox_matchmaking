@@ -13,7 +13,7 @@ export function InitUser() {
       {
          steamId: {
             primaryKey: true,
-            type: DataTypes.BIGINT,
+            type: DataTypes.TEXT,
             unique: true,
             allowNull: false,
          },
@@ -34,15 +34,19 @@ export function InitLobby() {
             primaryKey: true,
          },
          ownerId: {
-            type: DataTypes.BIGINT,
+            type: DataTypes.TEXT,
             allowNull: false,
             references: {
                model: User,
                key: "steamId",
             },
          },
+
          lobbyName: DataTypes.STRING,
-         players: DataTypes.NUMBER,
+         // players: {
+         //    type: DataTypes.ARRAY,
+         // },
+         playerCount: DataTypes.NUMBER,
          maxPlayers: DataTypes.NUMBER,
       },
       {

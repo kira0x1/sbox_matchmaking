@@ -12,6 +12,7 @@ export async function find(id: number): Promise<Lobby | null> {
 }
 
 export async function findByUser(id: string): Promise<Lobby | null> {
+   console.log(`finding lobby by id: ${id}`);
    const lobby = Lobby.findOne({ where: { ownerId: id } });
    return lobby;
 }

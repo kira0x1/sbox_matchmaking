@@ -27,12 +27,23 @@ export async function update(id: string, userUpdate: IUser): Promise<User | null
 }
 
 export async function findOrCreate(newUser: IUser) {
+   console.log(`finding: `);
+   console.log(newUser.steamId);
+   console.log(`\n\n`);
+
+   const found = await find(newUser.steamId);
+   console.log(`found: `);
+   console.dir(found);
+   console.log(`\n\n`);
+
    const userFound = await User.findOrCreate({
       where: { steamId: newUser.steamId },
       defaults: { ...newUser },
    });
 
-   if (userFound) {
+   console.log(userFound);
+
+   if (userFound[1]) {
       return userFound[0];
    }
 
