@@ -1,8 +1,8 @@
-import * as utils from "../util";
-import express, { Request, Response } from "express";
-import * as UserService from "./user.service";
-import ky from "ky";
+import express, { type Request, type Response } from "express";
 import clc from "cli-color";
+
+import * as UserService from "./user.service.js";
+import * as utils from "../util/index.js";
 
 export const userRouter = express.Router();
 
@@ -28,6 +28,19 @@ userRouter.post("/", async (req: Request, res: Response) => {
    }
 });
 
+userRouter.post("/update/:id", async (req: Request, res: Response) => {
+   try {
+      const id = req.params.id;
+
+      const updatedUser = await UserService.update(id, req.body);
+
+      res.status(200).send(updatedUser);
+   } catch (e: any) {
+      console.error(e);
+      res.status(500).send(e.message);
+   }
+});
+
 userRouter.post("/auth", async (req: Request, res: Response) => {
    try {
       const token = req.headers["token"] as string;
@@ -39,7 +52,7 @@ userRouter.post("/auth", async (req: Request, res: Response) => {
       console.log(`------------------------\n\n`);
 
       const result = await utils.verifySteamToken(token, steamId);
-      const parsedSteamRes = await result?.json<any>();
+      console.log(result);
 
       console.log(`Token: ${token}`);
       console.log(`SteamId: ${steamId}`);
@@ -48,7 +61,7 @@ userRouter.post("/auth", async (req: Request, res: Response) => {
       console.dir(req.body);
       console.log(`--------------------\n\n`);
 
-      if (!parsedSteamRes || parsedSteamRes?.Status === "invalid") {
+      if (!result || result?.Status === "invalid") {
          return res.status(500).send("Failed to Authenticate");
       }
 
@@ -63,14 +76,22 @@ userRouter.post("/auth", async (req: Request, res: Response) => {
    }
 });
 
-userRouter.get("/:id", async (req: Request, res: Response) => {
-   const id = req.params.id;
+userRouter.get("/lobby", async (req: Request, res: Response) => {
+   const id = req.query.id as string;
+   const userId = req.query.userid as string;
 
    try {
-      const user = await UserService.find(id);
+   } catch (e: any) {}
+});
 
-      if (user) {
-         return res.status(200).send(user);
+userRouter.get("/:id", async (req: Request, res: Response) => {
+   try {
+      const id = req.params.id;
+      const userFound = await UserService.find(id);
+
+      if (userFound) {
+         res.status(200).send(userFound);
+         return;
       }
 
       res.status(404).send("user not found");
@@ -84,8 +105,7 @@ userRouter.post("/findOrCreate", async (req: Request, res: Response) => {
    try {
       const user = req.body;
       const newUser = await UserService.findOrCreate(user);
-
-      res.status(201).json(newUser);
+      res.status(200).json(newUser);
    } catch (e: any) {
       console.error(e);
       res.status(500).send(e.message);

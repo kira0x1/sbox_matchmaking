@@ -1,44 +1,37 @@
-import { Lobby } from "../database/types";
-import { BaseLobby } from "../types";
+import { eq } from "drizzle-orm";
+import { db } from "../database";
+import { lobby } from "../database/schema";
+import { type BaseLobby } from "../types";
 
-export async function findAll(): Promise<Lobby[]> {
-   const lobbies = Lobby.findAll();
+export async function findAll() {
+   const lobbies = await db.select().from(lobby);
    return lobbies;
 }
 
-export async function find(id: number): Promise<Lobby | null> {
-   const lobby = Lobby.findOne({ where: { id: id } });
-   return lobby;
+export async function find(id: number) {
+   const lobbyFound = await db.query.lobby.findFirst({ where: eq(lobby.id, id) });
+   console.log(lobbyFound);
+   return lobbyFound;
 }
 
-export async function findByUser(id: string): Promise<Lobby | null> {
-   console.log(`finding lobby by id: ${id}`);
-   const lobby = Lobby.findOne({ where: { ownerId: id } });
-   return lobby;
+export async function findByOwner(id: string) {
+   const lobbyFound = await db.select().from(lobby).where(eq(lobby.ownerId, id));
+   console.log(lobbyFound);
+   return lobbyFound;
 }
 
-export async function create(newLobby: BaseLobby): Promise<Lobby> {
-   const createdLobby = Lobby.create({ ...newLobby });
+export async function create(newLobby: BaseLobby) {
+   const createdLobby = await db
+      .insert(lobby)
+      .values({ ownerId: newLobby.ownerId })
+      .returning();
+
    return createdLobby;
 }
 
-export async function update(id: number, lobbyUpdate: BaseLobby): Promise<Lobby | null> {
-   const lobby = await find(id);
+export async function update(id: number, lobbyUpdate: BaseLobby) {}
 
-   if (!lobby) {
-      return null;
-   }
-
-   lobby.update({ ...lobbyUpdate });
-   return lobby;
-}
-
-export async function remove(id: number): Promise<null | void> {
-   const lobby = await find(id);
-
-   if (!lobby) {
-      return null;
-   }
-
-   return lobby.destroy();
+export async function remove(id: number) {
+   const res = await db.delete(lobby).where(eq(lobby.id, id));
+   return res;
 }

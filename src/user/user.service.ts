@@ -1,61 +1,58 @@
-import { User } from "../database/types";
-import { IUser } from "../types";
+import { eq } from "drizzle-orm";
+import { db } from "../database";
+import { lobby, user } from "../database/schema";
+import { type IUser } from "../types";
 
-export async function findAll(): Promise<User[]> {
-   return User.findAll();
+export async function findAll() {
+  const users = await db.select().from(user);
+  return users;
 }
 
-export async function find(id: string): Promise<User | null> {
-   const userFound = await User.findOne({ where: { steamId: id } });
-   return userFound;
+export async function findBySteamId(id: string) {
+  const userFound = await db
+    .selectDistinct()
+    .from(user)
+    .where(eq(user.steamId, id));
+
+  return userFound;
 }
 
-export async function create(newUser: IUser): Promise<User> {
-   const created = await User.create({ ...newUser });
-   return created;
+export async function find(id: string) {
+  const userFound = await db.selectDistinct().from(user).where(eq(user.id, id));
+  return userFound;
 }
 
-export async function update(id: string, userUpdate: IUser): Promise<User | null> {
-   const user = await find(id);
+export async function findOwnedLobby(id: string) {
+  const userFound = await db.query.lobby.findFirst({
+    where: eq(lobby.ownerId, id),
+  });
+  return userFound;
+}
 
-   if (!user) {
-      return null;
-   }
+export async function create(newUser: IUser) {
+  const createdUser = await db
+    .insert(user)
+    .values({ ...newUser })
+    .returning();
 
-   user.update({ ...userUpdate });
-   return user;
+  return createdUser;
+}
+
+export async function update(id: string, userValues: IUser) {
+  const userUpdated = await db
+    .update(user)
+    .set({ ...userValues })
+    .where(eq(user.steamId, id))
+    .returning();
+
+  return userUpdated;
 }
 
 export async function findOrCreate(newUser: IUser) {
-   console.log(`finding: `);
-   console.log(newUser.steamId);
-   console.log(`\n\n`);
+  const foundUser = await find(newUser.steamId);
+  if (foundUser) return foundUser;
 
-   const found = await find(newUser.steamId);
-   console.log(`found: `);
-   console.dir(found);
-   console.log(`\n\n`);
-
-   const userFound = await User.findOrCreate({
-      where: { steamId: newUser.steamId },
-      defaults: { ...newUser },
-   });
-
-   console.log(userFound);
-
-   if (userFound[1]) {
-      return userFound[0];
-   }
-
-   return userFound[0];
+  return create(newUser);
 }
 
-export async function remove(id: string): Promise<null | void> {
-   const user = await find(id);
-
-   if (!user) {
-      return null;
-   }
-
-   return user.destroy();
-}
+export async function remove(id: string): Promise<null | void> {}
