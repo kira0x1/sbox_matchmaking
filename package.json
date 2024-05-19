@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "start": "bun run .",
-    "dev": "bun run --watch src/index.ts",
+    "dev": "bun run --hot src/index.ts",
+    "watch": "bun run --watch src/index.ts",
+    "ts:check": "tsc --noemit",
     "ls": "bun pm ls",
     "clean": "rimraf ./out",
     "db": "bunx drizzle-kit studio",
@@ -22,7 +24,7 @@
     "axios": "^1.6.8",
     "cli-color": "^2.0.4",
     "drizzle-orm": "^0.30.10",
-    "express": "^4.19.2",
+    "hono": "^4.3.8",
     "jsonwebtoken": "^9.0.2",
     "ky": "^1.2.4",
     "pg": "^8.11.5"
@@ -31,7 +33,6 @@
     "@faker-js/faker": "^8.4.1",
     "@types/bun": "latest",
     "@types/cli-color": "^2.0.6",
-    "@types/express": "^4.17.21",
     "@types/jsonwebtoken": "^9.0.6",
     "@types/pg": "^8.11.6",
     "drizzle-kit": "^0.21.2",

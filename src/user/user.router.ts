@@ -1,113 +1,80 @@
-import express, { type Request, type Response } from "express";
-import clc from "cli-color";
-
 import * as UserService from "./user.service.js";
-import * as utils from "../util/index.js";
+import { Hono } from "hono";
 
-export const userRouter = express.Router();
+const userRouter = new Hono();
 
-userRouter.get("/", async (req: Request, res: Response) => {
-   try {
-      const users = await UserService.findAll();
+userRouter.get("/", async (c) => {
+  try {
+    const users = await UserService.findAll();
 
-      res.status(200).send(users);
-   } catch (e: any) {
-      console.error(e);
-      res.status(500).send(e.message);
-   }
+    return c.json({ users }, 200);
+  } catch (e: any) {
+    console.error(e);
+    return c.json({ error: e.message }, 500);
+  }
 });
 
-userRouter.post("/", async (req: Request, res: Response) => {
-   try {
-      const newUser = await UserService.create(req.body);
+userRouter.post("/", async (c) => {
+  try {
+    const body = await c.req.json();
+    const newUser = await UserService.create(body);
 
-      res.status(201).json(newUser);
-   } catch (e: any) {
-      console.error(e);
-      res.status(500).send(e.message);
-   }
+    return c.json(newUser, 200);
+  } catch (e: any) {
+    console.error(e);
+    return c.json({ error: e.message }, 500);
+  }
 });
 
-userRouter.post("/update/:id", async (req: Request, res: Response) => {
-   try {
-      const id = req.params.id;
+userRouter.post("/update/:id", async (c) => {
+  try {
+    const id = c.req.param("id");
+    const body = await c.req.json();
 
-      const updatedUser = await UserService.update(id, req.body);
+    const updatedUser = await UserService.update(id, body);
 
-      res.status(200).send(updatedUser);
-   } catch (e: any) {
-      console.error(e);
-      res.status(500).send(e.message);
-   }
+    return c.json(updatedUser, 200);
+  } catch (e: any) {
+    console.error(e);
+    return c.json({ error: e.message }, 500);
+  }
 });
 
-userRouter.post("/auth", async (req: Request, res: Response) => {
-   try {
-      const token = req.headers["token"] as string;
-      const steamId = req.headers["steamid"] as string;
+userRouter.post("/auth", async (c) => {});
 
-      console.log(`\n------- SIGNING ----------`);
-      const jwtSign = utils.signJwt({ steamid: steamId }, "10s");
-      console.log(jwtSign);
-      console.log(`------------------------\n\n`);
+userRouter.get("/lobby", async (c) => {
+  const id = c.req.query("id");
+  const userId = c.req.query("userid");
 
-      const result = await utils.verifySteamToken(token, steamId);
-      console.log(result);
-
-      console.log(`Token: ${token}`);
-      console.log(`SteamId: ${steamId}`);
-
-      console.log(`\n-------- JSON ---------`);
-      console.dir(req.body);
-      console.log(`--------------------\n\n`);
-
-      if (!result || result?.Status === "invalid") {
-         return res.status(500).send("Failed to Authenticate");
-      }
-
-      console.log(clc.bgGreen.bold("SUCCESS"));
-
-      res.setHeader("meow", "owo");
-
-      return res.status(200).send("Authorized");
-   } catch (e: any) {
-      console.error(e.message);
-      res.status(500).send(e.message);
-   }
+  try {
+  } catch (e: any) {}
 });
 
-userRouter.get("/lobby", async (req: Request, res: Response) => {
-   const id = req.query.id as string;
-   const userId = req.query.userid as string;
+userRouter.get("/:id", async (c) => {
+  try {
+    const id = c.req.param("id");
+    const userFound = await UserService.find(id);
 
-   try {
-   } catch (e: any) {}
+    if (userFound) {
+      return c.json(userFound, 200);
+    }
+
+    return c.json({ error: "user not found" }, 404);
+  } catch (e: any) {
+    console.error(e);
+    return c.json({ error: e.message }, 500);
+  }
 });
 
-userRouter.get("/:id", async (req: Request, res: Response) => {
-   try {
-      const id = req.params.id;
-      const userFound = await UserService.find(id);
-
-      if (userFound) {
-         res.status(200).send(userFound);
-         return;
-      }
-
-      res.status(404).send("user not found");
-   } catch (e: any) {
-      console.error(e);
-      res.status(500).send(e.message);
-   }
+userRouter.post("/findOrCreate", async (c) => {
+  try {
+    const body = await c.req.json();
+    const newUser = await UserService.findOrCreate(body);
+    return c.json(newUser, 200);
+  } catch (e: any) {
+    console.error(e);
+    return c.json({ error: e.message }, 500);
+  }
 });
 
-userRouter.post("/findOrCreate", async (req: Request, res: Response) => {
-   try {
-      const user = req.body;
-      const newUser = await UserService.findOrCreate(user);
-      res.status(200).json(newUser);
-   } catch (e: any) {
-      console.error(e);
-      res.status(500).send(e.message);
-   }
-});
+export default userRouter;
