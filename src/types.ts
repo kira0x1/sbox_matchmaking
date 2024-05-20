@@ -4,10 +4,10 @@ export interface IUser {
   lobbyId?: number;
 }
 
-export interface BaseLobby {
-  ownerId: string;
+export interface ILobby {
+  id?: number;
+  ownerId?: string;
   lobbyName: string;
-  maxPlayers: number;
 }
 
 export interface SteamVerifyResponse {
