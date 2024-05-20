@@ -1,19 +1,29 @@
-import { Sequelize } from "sequelize";
+import * as schema from "./schema";
+import { drizzle } from "drizzle-orm/node-postgres";
 import clc from "cli-color";
-import { InitLobby, InitUser, Lobby, User } from "./types";
+import { Client } from "pg";
 
-export const conn = new Sequelize({
-   dialect: "sqlite",
-   storage: "db.sqlite",
-   logging: false,
-});
+class DbConnection {
+  static client = new Client({
+    user: process.env.DB_USER as string,
+    password: process.env.DB_PASS as string,
+    host: process.env.DB_HOST as string,
+    port: Number(process.env.DB_PORT),
+    database: "postgres",
+  });
 
-export function init() {
-   InitUser();
-   InitLobby();
+  public static db = drizzle(this.client, { schema });
 
-   // User.sync({ force: true });
-   // Lobby.sync({ force: true });
+  constructor() {
+    this.connect();
+  }
 
-   console.log(clc.bgMagenta.bold("INIT DB"));
+  public async connect() {
+    DbConnection.client.connect();
+    console.log(clc.bgMagenta.bold("DB CONNECTED"));
+  }
 }
+
+new DbConnection();
+
+export default DbConnection.db;

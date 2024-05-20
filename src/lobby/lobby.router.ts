@@ -1,66 +1,73 @@
-import express, { Request, Response } from "express";
-import { BaseLobby } from "../types";
-import * as LobbyService from "./lobby.service";
+import { Hono } from "hono";
+import * as lobbyService from "./lobby.service";
+import clc from "cli-color";
 
-export const lobbyRouter = express.Router();
+const lobbyRouter = new Hono();
 
-lobbyRouter.get("/", async (req: Request, res: Response) => {
-   try {
-      const lobbies = await LobbyService.findAll();
-      res.status(200).send(lobbies);
-   } catch (e: any) {
-      console.error(e);
-      res.status(500).send(e.message);
-   }
+lobbyRouter.get("/", async (c) => {
+  try {
+    const lobbies = await lobbyService.findAll();
+    return c.json({ lobbies }, 200);
+  } catch (e: any) {
+    return c.json({ error: e.message }, 500);
+  }
 });
 
-lobbyRouter.get("/:id", async (req: Request, res: Response) => {
-   const id: number = parseInt(req.params.id, 10);
+lobbyRouter.get("/:id", async (c) => {
+  try {
+    const id = Number(c.req.param("id"));
+    console.log(id);
+    const lobbyFound = await lobbyService.find(id);
 
-   try {
-      const lobby = await LobbyService.find(id);
-
-      if (lobby) {
-         return res.status(200).send(lobby);
-      }
-
-      res.status(404).send("lobby not found");
-   } catch (e: any) {
-      console.error(e);
-      res.status(500).send(e.message);
-   }
+    if (lobbyFound) {
+      return c.json({ lobbyFound }, 200);
+    }
+  } catch (e: any) {
+    return new Response(e.message, { status: 500 });
+  }
 });
 
-lobbyRouter.get("/owner/:id", async (req: Request, res: Response) => {
-   const id = req.params.id;
-   console.log(`searching for specific by user!: ${id}`);
+lobbyRouter.get("/owner/:id", async (c) => {
+  try {
+    const id = c.req.param("id") as string;
+    console.log(id);
+    const lobbyFound = await lobbyService.findByOwner(id);
 
-   try {
-      const lobby = await LobbyService.findByUser(id);
-
-      if (lobby) {
-         return res.status(200).send(lobby);
-      }
-
-      res.status(404).send("lobby not found");
-   } catch (e: any) {
-      console.error(e);
-      res.status(500).send(e.message);
-   }
+    if (lobbyFound) {
+      return c.json({ lobbyFound }, 200);
+    }
+  } catch (e: any) {
+    return new Response(e.message, { status: 500 });
+  }
 });
 
-lobbyRouter.post("/", async (req: Request, res: Response) => {
-   try {
-      console.log("creating lobby");
+lobbyRouter.get("/:id/members", async (c) => {
+  try {
+    console.log(clc.bgBlue.bold("LOBBY MEMBERS"));
+    const id = Number(c.req.param("id"));
+    const lobbyFound = await lobbyService.getMembers(id);
 
-      const lobby: BaseLobby = req.body;
-      console.log(lobby);
-
-      const newLobby = await LobbyService.create(lobby);
-
-      res.status(201).json(newLobby);
-   } catch (e: any) {
-      console.error(e);
-      res.status(500).send(e.message);
-   }
+    if (lobbyFound) {
+      return c.json({ lobbyFound }, 200);
+    }
+  } catch (e: any) {
+    return new Response(e.message, { status: 500 });
+  }
 });
+
+lobbyRouter.post("/", async (c) => {
+  try {
+    const lobbyToCreate = await c.req.json();
+    console.log(lobbyToCreate);
+
+    const lobbyCreated = await lobbyService.create(lobbyToCreate);
+    return c.json({ lobbyCreated }, 200);
+  } catch (e: any) {
+    console.error(e);
+    return c.json({ error: e.message }, 500);
+  }
+});
+
+lobbyRouter.post("/delete", async (c) => {});
+
+export default lobbyRouter;

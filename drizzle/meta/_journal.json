@@ -1,0 +1,13 @@
+{
+  "version": "6",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1716129461616,
+      "tag": "0000_right_true_believers",
+      "breakpoints": true
+    }
+  ]
+}

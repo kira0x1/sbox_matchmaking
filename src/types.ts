@@ -1,10 +1,17 @@
 export interface IUser {
-   displayName: string;
-   steamId: string;
+  displayName: string;
+  steamId: string;
+  lobbyId?: number;
 }
 
-export interface BaseLobby {
-   ownerId: string;
-   lobbyName: string;
-   maxPlayers: number;
+export interface ILobby {
+  id?: number;
+  ownerId?: string;
+  lobbyName: string;
+}
+
+export interface SteamVerifyResponse {
+  SteamId: string;
+  Status: string;
+  Failed?: boolean;
 }

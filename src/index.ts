@@ -1,19 +1,12 @@
-import clc from "cli-color";
-import express from "express";
-import { userRouter } from "./user/user.router";
-import { lobbyRouter } from "./lobby/lobby.router";
-import * as db from "./database";
-import config from "./config";
+import { Hono } from "hono";
+import sessionRouter from "./session/session.router";
+import userRouter from "./user/user.router";
+import lobbyRouter from "./lobby/lobby.router";
 
-db.init();
+const app = new Hono();
 
-const port = config.port;
-const app = express();
+app.route("/session", sessionRouter);
+app.route("/users", userRouter);
+app.route("/lobby", lobbyRouter);
 
-app.use(express.json());
-app.use("/users/", userRouter);
-app.use("/lobby/", lobbyRouter);
-
-app.listen(port, () => {
-   console.log(clc.bgBlue.bold("localhost:" + port));
-});
+export default app;
