@@ -7,7 +7,7 @@
     "start": "bun run .",
     "dev": "bun run --hot src/index.ts",
     "watch": "bun run --watch src/index.ts",
-    "ts:check": "tsc --noemit",
+    "check:ts": "tsc --noemit",
     "ls": "bun pm ls",
     "clean": "rimraf ./out",
     "db": "bunx drizzle-kit studio",

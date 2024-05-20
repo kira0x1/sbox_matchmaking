@@ -1,10 +1,8 @@
 import { faker } from "@faker-js/faker";
-import { db, init } from ".";
+import db from ".";
 import { user } from "./schema";
 import type { IUser } from "../types";
 import clc from "cli-color";
-
-await init();
 
 console.log(clc.bgRed.bold(`\nSEEDING DB\n`));
 
